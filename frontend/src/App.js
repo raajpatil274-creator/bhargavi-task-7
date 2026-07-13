@@ -1,35 +1,31 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+const express = require('express');
+const mongoose = require('mongoose');
+const cors = require('cors');
+require('dotenv').config();
 
-function App() {
-  const [products, setProducts] = useState([]);
+const app = express();
 
-  // ही तुमची लाइव्ह बॅकएंड लिंक आहे
-  const API_URL = 'https://bhargavi-task-7-1.onrender.com';
+// Middleware
+app.use(express.json());
+app.use(cors());
 
-  useEffect(() => {
-    const fetchProducts = async () => {
-      try {
-        const response = await axios.get(`${API_URL}/api/products`);
-        setProducts(response.data);
-      } catch (error) {
-        console.error("API Error:", error);
-      }
-    };
-    fetchProducts();
-  }, []);
+// MongoDB Connection
+// Make sure MONGO_URI is set in your Render Environment Variables
+const dbURI = process.env.MONGO_URI;
 
-  return (
-    <div>
-      <h1>Product List</h1>
-      {products.map((product) => (
-        <div key={product._id}>
-          <h3>{product.name}</h3>
-          <p>Price: {product.price}</p>
-        </div>
-      ))}
-    </div>
-  );
-}
+mongoose.connect(dbURI)
+  .then(() => console.log('MongoDB Connected Successfully'))
+  .catch(err => console.log('Database Connection Error:', err));
 
-export default App;
+// Root route to confirm the API is running
+app.get('/', (req, res) => {
+  res.send('API running');
+});
+
+// Define your routes here
+// Example: app.use('/api/products', require('./routes/productRoutes'));
+
+const PORT = process.env.PORT || 5000;
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
